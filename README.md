@@ -8,15 +8,17 @@ A markup language that compiles to sound.
 ```latex
 \author{Bob}
 \title{A Winter Ball}
+\tempo{60}
+\timesignature{4/4}
 
 \begin{stream}
 
-\play{Ab}{10s}{f}
+\play{Ab}{2}{f}
 
 \begin{define}{mymotif}
 
 \begin{dynamic}{p}
-\play{C}{5s}
+\play{C}{6}
 \end{dynamic}
 
 \end{define}
