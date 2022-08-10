@@ -10,10 +10,9 @@ A markup language that compiles to sound.
 \tag{Year}{2018}
 
 \begin{stream}  # Begin a synchronized stream
-    
   \begin{tempo}{60}  # 60 bpm
     \begin{timesignature}{4}{4}
-      \play{Ab}{2}{f}
+      \play{Ab}{2}{f}  # Play an Ab on the default instrument (piano) for 2 counts at forte.
       \begin{define}{mymotif}  # Define a repeatable sequence
         \begin{dynamic}{p}  # Apply dynamic to the following notes
           \play{C}{6}
