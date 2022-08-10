@@ -2,28 +2,26 @@
 
 A markup language that compiles to sound.
 
-
 ## Example
 
 ```latex
-\author{Bob}
+\author{Foobar}
 \title{A Winter Ball}
-\tempo{60}
-\timesignature{4/4}
 
-\begin{stream}
-
-\play{Ab}{2}{f}
-
-\begin{define}{mymotif}
-
-\begin{dynamic}{p}
-\play{C}{6}
-\end{dynamic}
-
-\end{define}
-
+\begin{stream}  # Begin a synchronized stream
+    
+  \begin{tempo}{60}  # 60 bpm
+    \begin{timesignature}{4}{4}
+      \play{Ab}{2}{f}
+      \begin{define}{mymotif}  # Define a repeatable sequence
+        \begin{dynamic}{p}  # Apply dynamic to the following notes
+          \play{C}{6}
+          \play{D}{2}
+          \play{E}{2}
+        \end{dynamic}
+      \end{define}
+      \mymotif{3}  # play the motif 3 times
+    \end{timesignature}
+  \end{tempo}
 \end{stream}
 ```
-
-
