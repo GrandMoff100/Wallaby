@@ -5,8 +5,9 @@ A markup language that compiles to sound.
 ## Example
 
 ```latex
-\author{Foobar}
-\title{A Winter Ball}
+\tag{Artist}{Foobar}
+\tag{Title}{A Winter Ball}
+\tag{Year}{2018}
 
 \begin{stream}  # Begin a synchronized stream
     

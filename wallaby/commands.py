@@ -16,31 +16,24 @@ class Command:
             setattr(self, key, value)
 
 
-class Author(Command, Component, Executable, component_name="author"):
-    """A command that sets the song author."""
+class Tag(Command, Component, Executable, component_name="author"):
+    """A command that set a song metadata tag."""
 
-    author_name: str
-
-    def execute(self, environment: "Environment") -> None:
-        """Execute the command."""
-        environment["author"] = self.author_name
-
-    def __repr__(self) -> str:
-        """Return a representation of the command."""
-        return f"{self.__class__.__name__}({self.author_name})"
-
-class Title(Command, Component, Executable, component_name="title"):
-    """A command that sets the song title."""
-
-    title: str
+    tag_name: str
+    tag_value: str
 
     def execute(self, environment: "Environment") -> None:
         """Execute the command."""
-        environment["title"] = self.title
+        pair = {self.tag_name: self.tag_value}
+        if "tags" not in environment.scope:
+            environment.scope["tags"] = pair
+        else:
+            environment.scope["tags"].update(pair)
 
     def __repr__(self) -> str:
         """Return a representation of the command."""
-        return f"{self.__class__.__name__}({self.title})"
+        return f"{self.__class__.__name__}({self.tag_name}, {self.tag_value})"
+
 
 class Play(Command, Component, Executable, component_name="play"):
     """A command that plays a note."""
@@ -51,7 +44,9 @@ class Play(Command, Component, Executable, component_name="play"):
 
     def __repr__(self) -> str:
         """Return a representation of the command."""
-        return f"{self.__class__.__name__}({self.note}, {self.duration}, {self.dynamic})"
+        return (
+            f"{self.__class__.__name__}({self.note}, {self.duration}, {self.dynamic})"
+        )
 
     def execute(self, environment: "Environment") -> None:
         """Execute the command."""
