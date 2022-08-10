@@ -29,33 +29,32 @@ def convert_arguments(cls: type, component: re.Match) -> list[Any]:
     ]
 
 
-def _compile_environment(component: re.Match, parent: Environment) -> Environment:
+def _parse_environment(component: re.Match, parent: Environment) -> Environment:
     env_type = Environment.delegate(component.group("name"))
     parent.body.append(
-        new_env := _compile(
+        new_env := _parse(
             component.group("body"),
             env_type(parent, *convert_arguments(env_type, component)),
         )
     )
-    new_env.execute()
+    new_env.compile()
 
 
-def _compile_command(component: re.Match, parent: Environment) -> None:
+def _parse_command(component: re.Match, parent: Environment) -> None:
     command_cls = parent.lookup(component.group("name"))
     parent.body.append(command_cls(*convert_arguments(command_cls, component)))
 
 
-def _compile(text: str, parent: Environment) -> Environment:
-    """Compile nested text to a sub-environment."""
+def _parse(text: str, parent: Environment) -> Environment:
     while True:
         try:
             component, is_cmd = next_component(text)
         except StopIteration:
             break
         if is_cmd:
-            _compile_command(component, parent)
+            _parse_command(component, parent)
         else:
-            _compile_environment(component, parent)
+            _parse_environment(component, parent)
         text = text.replace(component.group(0), "", 1)
     return parent
 
@@ -75,9 +74,9 @@ def next_component(text: str) -> tuple[re.Match | None, bool]:
     raise StopIteration()
 
 
-def compile_text(text: str) -> RootEnvironment:
+def parse_text(text: str) -> RootEnvironment:
     """Compile text to a root environment."""
-    return _compile(
+    return _parse(
         re.sub(
             r"\s*\n\s*",  # Remove newlines
             "",
@@ -85,15 +84,3 @@ def compile_text(text: str) -> RootEnvironment:
         ),
         RootEnvironment(),
     )
-
-def compile_file(filename: str) -> RootEnvironment:
-    """Compile a file to a root environment."""
-    with open(filename, "r", encoding="utf-8") as file:
-        return compile_text(file.read())
-
-def view(env: Environment, depth: int = 0) -> None:
-    """View the environment."""
-    for component in env.body:
-        print("  " * depth, component)
-        if isinstance(component, Environment):
-            view(component, depth + 1)

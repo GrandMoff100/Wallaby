@@ -1,5 +1,5 @@
 """The wallaby module."""
 
-from wallaby.compiler import _compile
+from wallaby.sound import compile_text
 
-__all__ = ("_compile",)
+__all__ = ("compile_text",)

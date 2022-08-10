@@ -1,6 +1,5 @@
-from wallaby.compiler import compile_file
+from wallaby import compile_text
 
 
-document = compile_file("README.md")
-document.execute()
-
+with open("README.md", "r", encoding="utf-8") as fh:
+    compile_text(fh.read())
