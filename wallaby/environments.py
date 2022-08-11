@@ -21,13 +21,16 @@ class BaseEnvironment:
         """Return a representation of the environment."""
         return f"{self.__class__.__name__}({self.scope})"
 
-    def lookup(self, key: str) -> Type[Command]:
-        """Lookup a command in the environment."""
-        if key in self.scope:
+    def get(self, key: str) -> Any:
+        """Lookup a command or variable in the environment."""
+        if key in self:
             return self.scope[key]
         if self.parent is not None:
-            return self.parent.lookup(key)
+            return self.parent[key]
         return DEFAULT_SCOPE[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.scope
 
     @classmethod
     def delegate(cls, name: str) -> Type["Environment"]:

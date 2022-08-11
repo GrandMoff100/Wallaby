@@ -21,9 +21,9 @@ def compile_text(text: str) -> pydub.AudioSegment:
     execute(tree)
     streams = [component for component in tree.body if isinstance(component, Stream)]
     main_audio = pydub.AudioSegment.silent(
-        duration=max(len(stream.scope["__sound__"]) for stream in streams),
+        duration=max(len(stream["__sound__"]) for stream in streams),
         frame_rate=FRAME_RATE,
     )
     for stream in streams:
-        main_audio = main_audio.overlay(stream.scope["__sound__"], position=stream.position)
+        main_audio = main_audio.overlay(stream["__sound__"], position=stream.position)
     return main_audio

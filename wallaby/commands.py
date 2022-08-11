@@ -1,10 +1,14 @@
 """Module for document commands."""
 from typing import TYPE_CHECKING, Any
 
+import pydub
+
 from wallaby.mixins import Component, Executable
 
 if TYPE_CHECKING:
     from wallaby.environments import Environment
+
+from wallaby.const import SIXTY_SECONDS
 
 
 class Command:
@@ -53,5 +57,22 @@ class Play(Command, Component, Executable, component_name="play"):
         if self.dynamic is not None:
             dynamic = self.dynamic
         else:
-            dynamic = environment.lookup("dynamic")
+            dynamic = environment["dynamic"]
         print("Playing", self.note, self.duration, dynamic)
+
+
+class Rest(Command, Component, Executable, component_name="rest"):
+    """A command that rests for a given duration."""
+
+    counts: int
+
+    def __repr__(self) -> str:
+        """Return a representation of the command."""
+        return f"{self.__class__.__name__}({self.counts})"
+
+    def execute(self, environment: "Environment") -> None:
+        """Execute the command."""
+        tempo = environment["tempo"]
+        environment["__sound__"] = environment["__sound__"].append(
+            pydub.AudioSegment.silent(duration=self.counts * SIXTY_SECONDS / tempo)
+        )

@@ -41,7 +41,7 @@ def _parse_environment(component: re.Match, parent: Environment) -> Environment:
 
 
 def _parse_command(component: re.Match, parent: Environment) -> None:
-    command_cls = parent.lookup(component.group("name"))
+    command_cls = parent[component.group("name")]
     parent.body.append(command_cls(*convert_arguments(command_cls, component)))
 
 
