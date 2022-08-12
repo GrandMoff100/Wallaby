@@ -1,9 +1,21 @@
 """Module for compiling environments to sound."""
 import pydub
-from wallaby.environments import Stream, BaseEnvironment, Environment
 
-from wallaby.parser import parse_text
 from wallaby.const import FRAME_RATE
+from wallaby.environments import (BaseEnvironment, Environment,
+                                  RootEnvironment, Stream)
+from wallaby.mixins import Component
+from wallaby.parser import parse_text
+
+
+class Soundfont(Environment, Component, component_name="soundfont"):
+    """An environment that tells notes to render with a different instrument."""
+
+    soundfont: str
+
+    def compile(self) -> None:
+        """Execute the command."""
+        self.scope["soundfont"] = self.soundfont
 
 
 def execute(tree: BaseEnvironment) -> None:
@@ -15,7 +27,7 @@ def execute(tree: BaseEnvironment) -> None:
             component.execute(tree)
 
 
-def compile_text(text: str) -> pydub.AudioSegment:
+def compile_text(text: str) -> tuple[pydub.AudioSegment, RootEnvironment]:
     """Compile the text into a sound."""
     tree = parse_text(text)
     execute(tree)
@@ -26,4 +38,4 @@ def compile_text(text: str) -> pydub.AudioSegment:
     )
     for stream in streams:
         main_audio = main_audio.overlay(stream["__sound__"], position=stream.position)
-    return main_audio
+    return main_audio, tree

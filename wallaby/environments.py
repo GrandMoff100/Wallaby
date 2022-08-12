@@ -4,6 +4,7 @@ import pydub
 
 from wallaby.commands import Command
 from wallaby.mixins import Component, Executable
+from wallaby.validators import OneOf
 
 DEFAULT_SCOPE = {cls.component_name: cls for cls in Command.__subclasses__()}
 
@@ -14,8 +15,8 @@ class BaseEnvironment:
     def __init__(self, parent: Optional["Environment"]) -> None:
         """Initialize the environment."""
         self.parent = parent
-        self.scope = {}
-        self.body = []
+        self.scope: dict[str, Any] = {}
+        self.body: list[Command | Environment] = []
 
     def __repr__(self) -> str:
         """Return a representation of the environment."""
@@ -28,6 +29,22 @@ class BaseEnvironment:
         if self.parent is not None:
             return self.parent[key]
         return DEFAULT_SCOPE[key]
+
+    def set(self, key: str, value: Any) -> None:
+        """Set a variable or command in the environment."""
+        env = self
+        while env.parent is not None:
+            env = env.parent
+            if key in env.scope:
+                env.scope[key] = value
+                return
+        self.scope[key] = value
+
+    def __getitem__(self, key: str) -> Any:
+        return self.get(key)
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.set(key, value)
 
     def __contains__(self, key: str) -> bool:
         return key in self.scope
@@ -67,7 +84,7 @@ class Stream(Environment, Component, component_name="stream"):
 
     def compile(self) -> None:
         """Sets an empty sound stream."""
-        self.scope["__sound__"] = pydub.AudioSegment.empty()
+        self["__sound__"] = pydub.AudioSegment.empty()
 
 
 class Definition(Environment, Component, component_name="define"):
@@ -97,7 +114,7 @@ class Definition(Environment, Component, component_name="define"):
                 for _ in range(self.repeat):
                     for component in definition_body:
                         if isinstance(component, Environment):
-                            component.execute()
+                            component.compile()
                         else:
                             component.execute(environment)
 
@@ -111,7 +128,7 @@ class Tempo(Environment, Component, component_name="tempo"):
 
     def compile(self) -> None:
         """Execute the command."""
-        self.scope["tempo"] = self.bpm
+        self["tempo"] = self.bpm
 
 
 class TimeSignature(Environment, Component, component_name="timesignature"):
@@ -122,14 +139,34 @@ class TimeSignature(Environment, Component, component_name="timesignature"):
 
     def compile(self) -> None:
         """Execute the command."""
-        self.scope["timesignature"] = f"{self.numerator}/{self.denominator}"
+        self["timesignature"] = self.numerator, self.denominator
 
 
 class StaticDynamic(Environment, Component, component_name="dynamic"):
-    """A command that sets a static dynamic for music it contains."""
+    """An environment that sets a static dynamic for music it contains."""
 
     dynamic: str
 
     def compile(self) -> None:
         """Execute the command."""
-        self.scope["dynamic"] = self.dynamic
+        self["dynamic"] = self.dynamic
+
+
+class Instrument(Environment, Component, component_name="instrument"):
+    """An environment that sets an instrument for music it contains."""
+
+    instrument: str = OneOf(["piano", "organ", "guitar", "bass", "drums"])
+
+    def compile(self) -> None:
+        """Execute the command."""
+        self["instrument"] = self.instrument
+
+
+class Octave(Environment, Component, component_name="octave"):
+    """An environment that sets a default octave for music it contains."""
+
+    octave: int
+
+    def compile(self) -> None:
+        """Execute the command."""
+        self["octave"] = self.octave
