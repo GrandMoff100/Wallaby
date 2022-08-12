@@ -20,8 +20,8 @@ report/
 # Cache files
 *.sqlite
 
-# Test Server
-test_server/
+# Development files
+ignore/
 
 # Distribution / packaging
 .Python
